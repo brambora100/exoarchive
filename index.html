@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExoArchive | Průzkum hlubokého vesmíru</title>
+    <!-- Import moderního písma -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --space-black: #020617;
+            --space-dark: #0f172a;
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--space-black);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Pozadí s hvězdami */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(white 1px, transparent 0);
+            background-size: 100px 100px;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        header {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1e293b 0%, var(--space-black) 100%);
+            padding: 2rem;
+        }
+
+        header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin: 0;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-top: 1rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: -100px auto 0;
+            padding: 0 2rem 5rem;
+        }
+
+        .planet-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            margin-bottom: 6rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        @media (max-width: 900px) {
+            .planet-card { grid-template-columns: 1fr; }
+            .container { margin-top: -50px; }
+        }
+
+        .image-box {
+            position: relative;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        .image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+        }
+
+        .info-box {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: fit-content;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            margin: 0 0 1.5rem;
+            color: #fff;
+        }
+
+        .description {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            padding-top: 2rem;
+        }
+
+        .stat-val {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .alert-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-top: 2rem;
+        }
+
+        .alert-box h4 {
+            color: #ef4444;
+            margin: 0 0 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Animace pro plynulost */
+        .planet-card {
+            transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+        .planet-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ExoArchive</h1>
+    <p>Interaktivní průvodce nejpozoruhodnějšími světy, které byly kdy objeveny za hranicemi naší Sluneční soustavy.</p>
+</header>
+
+<div class="container">
+
+<!-- HD 189733 b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/HD_189733b.jpg" alt="HD 189733 b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Vražedná modř</span>
+            <h2>HD 189733 b</h2>
+            <p class="description">Na první pohled vypadá jako poklidná, azurově modrá planeta připomínající Zemi. Zdání ale klame. Její barva není způsobena oceány, ale křemičitanovými částicemi v atmosféře, které rozptylují modré světlo. Kvůli extrémním teplotám se tyto částice mění v tekuté sklo. V kombinaci s větry, které vanou sedmkrát rychleji než zvuk, zde doslova prší sklo, a to vodorovně. Tato planeta byla také vůbec první, u které se vědcům podařilo vytvořit mapu teplotního rozložení povrchu.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Rychlost větru</span>
+                    <span class="stat-val">2 km/s (Mach 7)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Srážky</span>
+                    <span class="stat-val">Tekuté sklo</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">64,5 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">1,13 x Jupiter</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- TrES-2b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Absolutní temnota</span>
+            <h2>TrES-2b</h2>
+            <p class="description">TrES-2b je nejtemnější exoplaneta, jakou kdy lidstvo objevilo. Odráží méně než jedno procento světla, které na ni dopadá, což ji činí černější než uhlí nebo akrylová barva. Kdybychom se na ni mohli podívat zblízka, vypadala by jako obří koule temného plynu se slabým rudým nádechem, který způsobuje její žhnoucí teplota. Vědci si stále nejsou jisti, co přesně tuto extrémní temnotu způsobuje – pravděpodobně jde o absenci reflexních mraků a přítomnost chemických látek v atmosféře, jako je vypařený sodík a draslík, které světlo doslova požírají.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Albedo (odrazivost)</span>
+                    <span class="stat-val">< 1 %</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Povrchová teplota</span>
+                    <span class="stat-val">980 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">750 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Souhvězdí</span>
+                    <span class="stat-val">Drak</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://exoplanetradio.com/assets/images/exoplanets/TrES-2b_artist.jpg" alt="TrES-2b">
+        </div>
+    </section>
+
+<!-- GJ 1214 b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/GJ1214b_%28Artist%E2%80%99s_impression%29.jpg/1920px-GJ1214b_%28Artist%E2%80%99s_impression%29.jpg" alt="GJ 1214 b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Vodní superzemě</span>
+            <h2>GJ 1214 b</h2>
+            <p class="description">GJ 1214 b je světem zahaleným v husté páře. Na rozdíl od Země, kde voda tvoří jen zlomek celkové hmotnosti, by se tato planeta mohla skládat až z 50 % z vody. Kvůli vysokým teplotám a obrovskému tlaku se zde však voda nenachází jen v oceánech, ale ve formě horkého ledu nebo superkritické tekutiny – exotického stavu hmoty, který připomíná hustý plyn i kapalinu zároveň. Celá planeta je obklopena neprostupnou vrstvou mraků a mlhy, což jí dodává tajemný, mléčný vzhled.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Složení</span>
+                    <span class="stat-val">Horký led / Pára</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">6,55 x Země</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">40 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Povrch</span>
+                    <span class="stat-val">Bez pevné pevniny</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- HD 131399 Ab -->
+    <section class="planet-card">
+        <div class="info-box" style="grid-column: span 2;">
+            <span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Vědecký omyl / Hvězda v pozadí</span>
+            <h2>HD 131399 Ab</h2>
+            <p class="description">Příběh tohoto objektu je jedním z nejzajímavějších v moderní astronomii. Původně byl HD 131399 Ab oslavován jako vzácná exoplaneta obíhající v systému se třemi slunci, kde by pozorovatel mohl zažít neustálý den nebo trojitý západ slunce. Nicméně v roce 2022, po šesti letech precizního pozorování, astronomové zjistili, že jde o optický klam. Objekt, který vypadal jako planeta, je ve skutečnosti velmi vzdálená hvězda v pozadí, která se díky náhodnému postavení z pohledu Země pouze „maskovala“ jako součást tohoto blízkého hvězdného systému.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+                <div class="image-box" style="border-radius: 20px; overflow: hidden; height: 250px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/HD_131399.jpg/1280px-HD_131399.jpg" alt="Snímek SPHERE">
+                </div>
+                <div class="image-box" style="border-radius: 20px; overflow: hidden; height: 250px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Artist%E2%80%99s_impression_of_planet_in_the_HD_131399_system.jpg/1920px-Artist%E2%80%99s_impression_of_planet_in_the_HD_131399_system.jpg" alt="Umělecká představa">
+                </div>
+            </div>
+
+            <div class="stats" style="margin-top: 2rem;">
+                <div class="stat">
+                    <span class="stat-label">Původní zařazení</span>
+                    <span class="stat-val">Exoplaneta (2016)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Nové zjištění</span>
+                    <span class="stat-val">Vzdálená hvězda (2022)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost systému</span>
+                    <span class="stat-val">340 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Zajímavost</span>
+                    <span class="stat-val">Vlastní pohyb objektu</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+<!-- WASP-76b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4v-IAPQd2E6Uxxf_DfZCt_KEzct0as5rpSb2fr-TGRfy45NbFyzM8UBfHqnPInBtvXP4h2XoHIH-sKo8kcG9Q0N0xtUxlie4APxApgA&s=10" alt="WASP-76b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Železný déšť</span>
+            <h2>WASP-76b</h2>
+            <p class="description">Tento ultra-horký plynný obr je skutečným ztělesněním vesmírného pekla. Planeta má vázanou rotaci, což znamená, že jedna strana je neustále bičována žárem hvězdy, zatímco druhá zůstává v temnotě. Na denní straně se teploty šplhají tak vysoko (přes 2 400 °C), že se tam vypařují kovy. Silné větry pak tyto železné páry odnášejí na chladnější noční stranu, kde páry zkondenzují a padají k povrchu v podobě kapek tekutého železa.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Teplota dne</span>
+                    <span class="stat-val">2 400 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">640 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">0,92 x Jupiter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hlavní jev</span>
+                    <span class="stat-val">Železný déšť</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- J1407b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Pán prstenců</span>
+            <h2>J1407b</h2>
+            <p class="description">Tento hnědý trpaslík (nebo obří planeta) vlastní nejvelkolepější systém prstenců, jaký byl kdy ve vesmíru spatřen. Prstence J1407b jsou přibližně 200krát rozsáhlejší než ty u našeho Saturnu. Celkem jich je přes 30 a jejich celkový průměr dosahuje neuvěřitelných 120 milionů kilometrů. V mezerách mezi prstenci pravděpodobně vznikají exoměsíce o velikosti Marsu či Země. Tato soustava je tak obrovská, že kdyby se planeta nacházela v místě Saturnu, dominovala by noční obloze na Zemi.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Počet prstenců</span>
+                    <span class="stat-val">37 hlavních</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Průměr prstenců</span>
+                    <span class="stat-val">120 mil. km</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">434 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">~20 x Jupiter</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://www.astro.cz/images/obrazky/original/j1407_ronmiller.jpg" alt="J1407b">
+        </div>
+    </section>
+    
+    <!-- Kepler-16b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://assets.science.nasa.gov/dynamicimage/assets/science/astro/exo-explore/2024/03/Kepler-16b_thumbnail.jpg?w=1600&h=900&fit=clip&crop=faces%2Cfocalpoint" alt="Kepler-16b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Světy dvou sluncí</span>
+            <h2>Kepler-16b</h2>
+            <p class="description">Kepler-16b je první jednoznačně potvrzenou cirkumbinární planetou – tedy světem, který obíhá kolem dvou hvězd najednou. Pokud byste stáli na jejím povrchu (nebo spíše na povrchu hypotetického měsíce, protože jde o plynného obra), viděli byste na obloze dva západy slunce. Hvězdy se navzájem zastiňují, což způsobuje pravidelné kolísání světla. I když připomíná pouštní planetu Tatooine ze Star Wars, Kepler-16b je ve skutečnosti mrazivý svět složený z plynu, ledu a skalnatého jádra.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Typ systému</span>
+                    <span class="stat-val">Binární (2 hvězdy)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota</span>
+                    <span class="stat-val">-70 až -100 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">200 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Oběžná doba</span>
+                    <span class="stat-val">229 dní</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+	<!-- Kepler-70b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Přeživší z pekla</span>
+            <h2>Kepler-70b</h2>
+            <p class="description">Kepler-70b je jednou z nejteplejších exoplanet, jaké kdy byly objeveny. Její historie je fascinující a děsivá zároveň: tato planeta kdysi obíhala hvězdu, která se změnila v rudého obra a pohltila vše ve své blízkosti. Kepler-70b toto „spolknutí“ přežila a zůstala uvězněna na extrémně blízké dráze. Dnes je z ní jen ohořelé, husté jádro, které je bičováno takovým žárem, že jeho povrchová teplota překonává teplotu povrchu našeho Slunce. Je to svět, který se doslova vypařuje před očima astronomů.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Teplota povrchu</span>
+                    <span class="stat-val">cca 6 800 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Délka roku</span>
+                    <span class="stat-val">5,7 hodiny</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">3 850 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Stav</span>
+                    <span class="stat-val">Vypařující se</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <div style="width:100%; height:100%; background: radial-gradient(circle, #ffca28 0%, #e65100 50%, #212121 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; font-size:1.2rem; text-align:center; padding: 20px;">[ EXTREME HEAT WORLD ]</div>
+        </div>
+    </section>
+    
+    <!-- WASP-12b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://assets.science.nasa.gov/dynamicimage/assets/science/astro/exo-explore/2024/03/wasp12b.png?w=712&h=450&fit=clip&crop=faces%2Cfocalpoint" alt="WASP-12b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Odsouzený obr</span>
+            <h2>WASP-12b</h2>
+            <p class="description">WASP-12b je plynný obr, který se nachází v tragickém stádiu své existence. Obíhá svou mateřskou hvězdu tak blízko, že ji obrovské slapové síly deformují do tvaru vajíčka (ragbyového míče). Hvězda svou gravitací doslova vysává atmosféru planety a vytváří kolem ní disk materiálu, který postupně pohlcuje. Vědci odhadují, že za pouhých 10 milionů let bude tato planeta kompletně pozřena. Kromě toho je WASP-12b neuvěřitelně temná, protože pohlcuje téměř veškeré světlo ze své hvězdy, podobně jako asfalt.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Tvar</span>
+                    <span class="stat-val">Vejčitý</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba do zániku</span>
+                    <span class="stat-val">10 mil. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Povrchová teplota</span>
+                    <span class="stat-val">2 200 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">870 sv. let</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- K2-141b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <div style="width:100%; height:100%; background: linear-gradient(45deg, #ff4500 0%, #8b0000 50%, #2f4f4f 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; font-size:1.2rem; text-align:center; padding: 20px;">[ MAGMA & ROCK RAIN WORLD ]</div>
+        </div>
+        <div class="info-box">
+            <span class="badge">Peklo z kamene</span>
+            <h2>K2-141b</h2>
+            <p class="description">K2-141b je fascinující tím, že má koloběh podobný tomu pozemskému, ale místo vody v něm figurují skály. Na denní straně je takové horko, že se kameny vypařují a tvoří tenkou atmosféru z minerálů. Tyto kamenné páry jsou větry unášeny na mrazivou noční stranu, kde kondenzují a prší zpět na povrch v podobě pevných hornin. Na planetě se nacházejí oceány tekuté lávy hluboké až 100 kilometrů, zatímco na odvrácené straně panuje nepředstavitelný mráz.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Srážky</span>
+                    <span class="stat-val">Kamenný déšť</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Oceány</span>
+                    <span class="stat-val">Magma (100 km hloubka)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota dne</span>
+                    <span class="stat-val">3 000 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota noci</span>
+                    <span class="stat-val">-200 °C</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- WASP-7b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Planet_WASP-7_b.png" alt="WASP-7b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Nafouknutý obr</span>
+            <h2>WASP-7b</h2>
+            <p class="description">WASP-7b je prototypem takzvaného „horkého Jupitera“. Je to obří plynná planeta, která obíhá svou hvězdu v extrémní blízkosti. Intenzivní teplo z hvězdy proniká hluboko do její atmosféry a způsobuje její masivní tepelnou expanzi. Výsledkem je, že planeta má mnohem větší objem, než by odpovídalo její hmotnosti – je neuvěřitelně „řídká“. Kvůli své dráze je bičována radiací, která neustále ohřívá její mračna na tisíce stupňů, což z ní činí jeden z nejméně pohostinných, ale vizuálně nejzajímavějších objektů v našem okolí.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Hustota</span>
+                    <span class="stat-val">Velmi nízká</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">0,96 x Jupiter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">460 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Oběžná doba</span>
+                    <span class="stat-val">4,9 dne</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+	<!-- Kepler-186f -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Kepler186f-ArtistConcept-20140417.jpg/1920px-Kepler186f-ArtistConcept-20140417.jpg" alt="Kepler-186f">
+        </div>
+        <div class="info-box">
+            <span class="badge">Bratranec Země</span>
+            <h2>Kepler-186f</h2>
+            <p class="description">Kepler-186f je historickým milníkem v hledání nového domova. Je to první planeta s poloměrem srovnatelným se Zemí, která obíhá svou hvězdu v zóně života. Její mateřská hvězda je červený trpaslík, což znamená, že je chladnější a červenější než naše Slunce. Pokud by na planetě rostly rostliny, jejich fotosyntéza by byla ovlivněna tímto červeným světelným spektrem, což by mohlo vést k tomu, že by vegetace byla spíše rudá nebo žlutá než zelená. I když je v obyvatelné zóně, její přesné složení atmosféry zůstává záhadou.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Podobnost se Zemí</span>
+                    <span class="stat-val">Poloměr 1,1x</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ hvězdy</span>
+                    <span class="stat-val">Červený trpaslík</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">582 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Délka roku</span>
+                    <span class="stat-val">130 dní</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- HD 209458 b (Osiris) -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Vypařující se obr</span>
+            <h2>HD 209458 b</h2>
+            <p class="description">Osiris je plynný obr, který se zapsal do historie jako první exoplaneta, u níž byla detekována atmosféra a následně i její únik do okolního prostoru. Kvůli extrémní blízkosti ke své hvězdě je její vodíková atmosféra zahřívána na tak vysoké teploty, že uniká z gravitačního sevření planety. Tento proces vytváří za planetou gigantický chvost připomínající kometu, který je dlouhý přes 200 000 kilometrů. Osiris nám tak v přímém přenosu ukazuje, jak hvězdy mohou pomalu likvidovat své plynné souputníky.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Fenomén</span>
+                    <span class="stat-val">Kometární ohon</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Ztráta hmoty</span>
+                    <span class="stat-val">10 000 tun/s</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">150 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">3,5 dne</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cd/Transiting_planet_HD_209458b.png" alt="HD 209458 b">
+        </div>
+    </section>
+    
+    <!-- HD 106906 b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Hubble_Space_Telescope_image_showing_one_possible_orbit_%28dashed_ellipse%29_of_the_11-Jupiter-mass_exoplanet_HD_106906_b.png" alt="HD 106906 b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Osamělý vyhnanec</span>
+            <h2>HD 106906 b</h2>
+            <p class="description">Tato planeta je skutečným rebelem vesmíru. Obíhá kolem dvojhvězdy v neuvěřitelné vzdálenosti 650 AU (tedy 650krát dále, než je Země od Slunce). Pro srovnání: je to 16krát dál, než je Pluto od Slunce. Vědci si dlouho lámali hlavu, jak mohla tak obrovská planeta vzniknout tak daleko od svých hvězd, kde je materiál velmi řídký. Jednou z teorií je, že vznikla mnohem blíže, ale byla gravitačním „kopancem“ vyvržena na okraj systému, kde nyní tiše a chladně putuje prázdnotou.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost od hvězdy</span>
+                    <span class="stat-val">97 miliard km</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Délka roku</span>
+                    <span class="stat-val">15 000 let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">11 x Jupiter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Stáří</span>
+                    <span class="stat-val">Jen 13 mil. let</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- KELT-9b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Teplejší než hvězdy</span>
+            <h2>KELT-9b</h2>
+            <p class="description">KELT-9b je absolutním extrémem mezi planetami. Její denní strana dosahuje teploty přes 4 300 °C, což je více než u mnoha hvězd (např. červených trpaslíků). Kvůli tomuto pekelnému žáru se molekuly v její atmosféře, jako je vodík, rozpadají na jednotlivé atomy. Astronomové zde dokonce detekovali výpary železa a titanu v plynné formě. Planeta je neustále bombardována tak silným ultrafialovým zářením ze své mateřské hvězdy, že se její atmosféra doslova vypařuje do vesmíru a vytváří zářící plynné mraky.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Teplota dne</span>
+                    <span class="stat-val">4 327 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ atmosféry</span>
+                    <span class="stat-val">Kovové páry</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">670 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">2,8 x Jupiter</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/PIA21472_-_Hottest_Hot_Jupiter_Animation_%28Artist%27s_Concept%29.gif" alt="KELT-9b">
+        </div>
+    </section>
+    
+    <!-- 55 Cancri e -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/55_Cancri_e_-_PIA20068.jpg/1920px-55_Cancri_e_-_PIA20068.jpg" alt="55 Cancri e">
+        </div>
+        <div class="info-box">
+            <span class="badge">Diamantový svět</span>
+            <h2>55 Cancri e</h2>
+            <p class="description">55 Cancri e je superzemě obíhající tak blízko své hvězdy, že rok zde trvá pouhých 18 hodin. Vědci spekulují, že tato planeta je velmi bohatá na uhlík. Kvůli obrovskému tlaku a povrchové teplotě kolem 2 400 °C by podstatná část jejího nitra mohla být tvořena krystalickým uhlíkem – tedy diamantem. Povrch je pravděpodobně pokryt oceány tekuté lávy a její atmosféra je velmi tenká nebo zcela chybí, což z ní činí sálající klenot v hlubinách vesmíru.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Složení</span>
+                    <span class="stat-val">Bohatá na uhlík</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Délka roku</span>
+                    <span class="stat-val">18 hodin</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">8 x Země</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">40 sv. let</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Gliese 436 b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Hořící led</span>
+            <h2>Gliese 436 b</h2>
+            <p class="description">Gliese 436 b je fascinující paradox. Přestože její povrchová teplota dosahuje stovek stupňů Celsia, planeta je z velké části tvořena vodním ledem. Jak je to možné? Obrovská gravitace a tlak planety stlačují vodní páru do pevného skupenství (tzv. Led X), který zůstává tuhý i při teplotách, kdy by se normální led okamžitě vypařil. Nad tímto žhavým ledem se nachází atmosféra z vodíku a hélia, která se vlivem blízké hvězdy neustále vypařuje a vytváří za planetou gigantický oblak par.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Skupenství</span>
+                    <span class="stat-val">Horký led (Ice X)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota</span>
+                    <span class="stat-val">439 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">33 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Velikost</span>
+                    <span class="stat-val">Podobná Neptunu</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://assets.science.nasa.gov/dynamicimage/assets/science/astro/exo-explore/2024/03/Gliese436b1200.jpg?w=1200&h=675&fit=clip&crop=faces%2Cfocalpoint" alt="Gliese 436 b">
+        </div>
+    </section>
+    
+    <!-- PSR B1257+12 b (Draugr) -->
+    <section class="planet-card">
+        <div class="image-box">
+            <div style="width:100%; height:100%; background: radial-gradient(circle, #4a148c 0%, #000 70%); display:flex; align-items:center; justify-content:center; color:#e1bee7; font-weight:bold; font-size:1.2rem; text-align:center; padding: 20px; border: 1px solid #7b1fa2;">[ PULSAR GHOST WORLD ]</div>
+        </div>
+        <div class="info-box">
+            <span class="badge">Nemrtvý svět</span>
+            <h2>PSR B1257+12 b</h2>
+            <p class="description">Draugr je planeta duchů. Přežila (nebo vznikla z trosek) explozi supernovy a nyní obíhá kolem pulsaru, který se otočí kolem své osy více než 160krát za sekundu. Celý systém je neustále bombardován intenzivním rentgenovým a gama zářením. Kdybychom stáli na jejím povrchu, neviděli byste žádné slunce, ale jen oslepující, úzký paprsek elektromagnetického záření prořezávající temnotu, zatímco oblohu by rozzářila polární záře tisíckrát silnější než na Zemi.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Typ hvězdy</span>
+                    <span class="stat-val">Pulsar (Neutronová h.)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Záření</span>
+                    <span class="stat-val">Smrtící (X-ray, Gamma)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">2 300 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">0,02 x Země (jako Měsíc)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+<!-- WASP-107b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Cukrová vata</span>
+            <h2>WASP-107b</h2>
+            <p class="description">WASP-107b je astronomickou záhadou. Přestože je svou velikostí téměř srovnatelná s Jupiterem, její hmotnost je osmkrát nižší. To z ní dělá jednu z nejméně hustých exoplanet vůbec – její hustota je podobná cukrové vatě. Díky této extrémní lehkosti a blízkosti k hvězdě se její atmosféra nafukuje do obrovských rozměrů a táhne se za ní jako gigantický ohon. Nedávno tam teleskop Jamese Webba dokonce objevil písečné mraky a déšť z křemičitanů, což z tohoto „nadýchaného“ světa dělá místo s velmi exotickým počasím.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Hustota</span>
+                    <span class="stat-val">Jako cukrová vata</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Počasí</span>
+                    <span class="stat-val">Písečný déšť</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">200 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Atmosféra</span>
+                    <span class="stat-val">Křemičitany a hélium</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Warm_Gas-Giant_Exoplanet_WASP-107_b_%28Artist%27s_Concept%29_%282024-113%29.png/1920px-Warm_Gas-Giant_Exoplanet_WASP-107_b_%28Artist%27s_Concept%29_%282024-113%29.png" alt="WASP-107b">
+        </div>
+    </section>
+    
+    <!-- Ross 128 b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Poklidný soused</span>
+            <h2>Ross 128 b</h2>
+            <p class="description">Ross 128 b je kamenná planeta o velikosti Země, která obíhá kolem červeného trpaslíka. Co ji však činí výjimečnou, je její „mírumilovná“ hvězda. Na rozdíl od většiny červených trpaslíků, kteří své planety bičují smrtícími erupcemi, je Ross 128 neobvykle klidná hvězda. Díky tomu je pravděpodobné, že si planeta mohla udržet svou atmosféru a možná i podmínky vhodné pro život. Teploty se zde odhadují v rozmezí, které by umožnilo existenci kapalné vody, což z ní dělá jeden z nejdůležitějších cílů pro budoucí hledání mimozemských biosignatur.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Kamenná (Superzemě)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota povrchu</span>
+                    <span class="stat-val">-60 °C až +20 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">11 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hvězdná aktivita</span>
+                    <span class="stat-val">Velmi nízká</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Artist%27s_impression_of_the_planet_Ross_128_b.jpg/1280px-Artist%27s_impression_of_the_planet_Ross_128_b.jpg" alt="Ross 128 b">
+        </div>
+    </section>
+    
+    <!-- LHS 3844b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Čedičová sféra</span>
+            <h2>LHS 3844b</h2>
+            <p class="description">LHS 3844b je fascinující tím, co nemá – atmosféru. Tato kamenná planeta obíhá svou hvězdu tak blízko, že silný hvězdný vítr doslova odfoukl veškerý plyn. Povrch planety je pravděpodobně tvořen tmavým čedičem, podobným tomu, který najdeme na dně pozemských oceánů nebo na Měsíci. Bez atmosféry, která by rozváděla teplo, je rozdíl mezi dnem a nocí brutální: na jedné straně se skála taví pod náporem záření, zatímco na té odvrácené panuje absolutní mrazivá temnota.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Povrch</span>
+                    <span class="stat-val">Tmavý čedič</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Atmosféra</span>
+                    <span class="stat-val">Žádná</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">48,5 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">11 hodin</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/PIA23130-Exoplanet-LHS3844b-ArtistConcept-20190819.jpg/1920px-PIA23130-Exoplanet-LHS3844b-ArtistConcept-20190819.jpg" alt="LHS 3844b">
+        </div>
+    </section>
+    
+    <!-- GJ 1214 b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Vodní svět</span>
+            <h2>GJ 1214 b</h2>
+            <p class="description">GJ 1214 b je pravděpodobně tvořena převážně vodou, ale kvůli vysoké teplotě a tlaku tamní oceány nevypadají jako ty naše. Celá planeta je zahalena v husté, neprostupné vrstvě mraků a páry. Pod touto horkou atmosférou se pravděpodobně nachází hluboký oceán, kde se voda vlivem extrémního tlaku mění na exotické formy ledu (např. Led VII) a „supekritickou tekutinu“ – stav, kdy voda není ani plynem, ani kapalinou, ale má vlastnosti obojího.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Složení</span>
+                    <span class="stat-val">75 % voda</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Mini-Neptun</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">40 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Atmosféra</span>
+                    <span class="stat-val">Hustá pára</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/GJ1214b_%28Artist%E2%80%99s_impression%29.jpg/1280px-GJ1214b_%28Artist%E2%80%99s_impression%29.jpg" alt="GJ 1214 b">
+        </div>
+    </section>
+    
+    <!-- HD 189733 b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Skleněná bouře</span>
+            <h2>HD 189733 b</h2>
+            <p class="description">Na první pohled působí tato exoplaneta mírumilovně modře, ale tato barva není způsobena oceány. Pochází z křemičitanových částic v její atmosféře, které rozptylují modré světlo. Kvůli extrémním teplotám se tyto částice mění v roztavené sklo. To by samo o sobě bylo děsivé, ale v kombinaci s větry o rychlosti přes 7 000 km/h (sedminásobek rychlosti zvuku) se zdejší déšť mění v projektily letící do stran. Je to svět, kde prší sklo, a to vodorovně.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Rychlost větru</span>
+                    <span class="stat-val">2 km/s</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Srážky</span>
+                    <span class="stat-val">Roztavené sklo</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">64,5 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Barva</span>
+                    <span class="stat-val">Kobaltově modrá</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://assets.science.nasa.gov/dynamicimage/assets/science/astro/exo-explore/2024/03/HD189733b.jpg?w=1280&h=914&fit=clip&crop=faces%2Cfocalpoint" alt="HD 189733 b">
+        </div>
+    </section>
+    
+    <!-- TrES-2b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://exoplanetradio.com/assets/images/exoplanets/TrES-2b_artist.jpg" alt="TrES-2b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Temnější než uhlí</span>
+            <h2>TrES-2b</h2>
+            <p class="description">TrES-2b je skutečným monstrem temnoty. Tato planeta odráží méně než 1 % světla, které na ni dopadá, což z ní činí černější objekt, než je černé uhlí nebo akrylová barva. Proč je tak temná, zůstává záhadou – vědci spekulují o absenci reflexních mraků a přítomnosti chemických látek, jako je plynný sodík nebo oxid titaničitý, které světlo pohlcují. I když je černá jako uhel, není studená; její atmosféra sálá slabou červenou září, podobně jako rozžhavený uhlík v krbu.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Odrazivost (Albedo)</span>
+                    <span class="stat-val">< 1 %</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota</span>
+                    <span class="stat-val">980 °C</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">750 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Souhvězdí</span>
+                    <span class="stat-val">Drak (Draco)</span>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    
+    <!-- Kepler-16b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Dvojité slunce</span>
+            <h2>Kepler-16b</h2>
+            <p class="description">Kepler-16b je cirkumbinární planeta, což znamená, že její oběžná dráha obepíná dvě hvězdy – jeden oranžový a jeden červený trpaslík. Tato tělesa se navzájem zatmívají každých 41 dní. Přestože jde o plynového obra o velikosti Saturnu, nachází se na okraji obyvatelné zóny. Je to svět, kde se stíny neustále pohybují a mění v závislosti na pozici obou sluncí. Objev této planety dokázal, že stabilní planetární systémy mohou existovat i v takto dynamickém hvězdném prostředí.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Počet sluncí</span>
+                    <span class="stat-val">2</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Plynný obr</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">200 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Teplota</span>
+                    <span class="stat-val">-70 °C až -100 °C</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://assets.science.nasa.gov/dynamicimage/assets/science/astro/exo-explore/2024/03/Kepler-16b_thumbnail.jpg?w=1600&h=900&fit=clip&crop=faces%2Cfocalpoint" alt="Kepler-16b">
+        </div>
+    </section>
+    
+    <!-- Proxima Centauri b -->
+    <section class="planet-card">
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Artist%E2%80%99s_impression_of_Proxima_Centauri_b_shown_hypothetically_as_an_arid_rocky_super-earth.jpg/1280px-Artist%E2%80%99s_impression_of_Proxima_Centauri_b_shown_hypothetically_as_an_arid_rocky_super-earth.jpg" alt="Proxima Centauri b">
+        </div>
+        <div class="info-box">
+            <span class="badge">Nejbližší exoplaneta</span>
+            <h2>Proxima Centauri b</h2>
+            <p class="description">Proxima Centauri b je kamenný svět jen o málo větší než Země, který obíhá v obyvatelné zóně nejbližší hvězdy od Slunce. Má to však háček: její hvězda, červený trpaslík Proxima Centauri, je velmi aktivní a bičuje planetu rentgenovým zářením, které je 400krát silnější než na Zemi. Planeta má pravděpodobně vázanou rotaci – jedna strana je věčně ozářená, zatímco na druhé panuje věčná noc. Pokud má atmosféru, život by mohl teoreticky existovat v úzkém pásu „věčného soumraku“ mezi těmito polokoulemi.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">4,2 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Terestrická (Skalnatá)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">1,17 x Země</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">11,2 dne</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- HR 5183 b -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Vesmírný prak</span>
+            <h2>HR 5183 b</h2>
+            <p class="description">HR 5183 b je plynný obr, který tráví většinu svého času (trvajícího desítky let) v mrazivých vnějších částech svého systému. Jakmile se však přiblíží ke své hvězdě, neuvěřitelně zrychlí. Díky své extrémně eliptické dráze se doslova prožene kolem hvězdy jako prak a pak je vymrštěn zpět do temnoty. Kdyby byl tento svět v naší sluneční soustavě, pohyboval by se od oblasti za Neptunem až dovnitř dráhy Jupiteru. Tento pohyb by pravděpodobně katapultoval jakékoli menší sousední planety pryč ze systému.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Excentricita</span>
+                    <span class="stat-val">Extrémní (0,84)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">3 x Jupiter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">103 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">~74 let</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRyuGppFYH68lPX-c_Ji8KL0AoLNisnzwiJQ&s" alt="HR 5183 b">
+        </div>
+    </section>
+    
+<!-- PSO J318.5-22 -->
+<section class="planet-card">
+    <div class="image-box">
+        <div style="width:100%; height:100%; background: radial-gradient(circle, #4c1d95 0%, #1e1b4b 70%, #020617 100%); display:flex; align-items:center; justify-content:center; color:#a5b4fc; font-weight:bold; font-size:1.2rem; text-align:center; padding: 20px; border: 1px solid #312e81;">[ ROGUE PLANET ]</div>
+    </div>
+    <div class="info-box">
+        <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c4b5fd;">Toulavá planeta</span>
+        <h2>PSO J318.5-22</h2>
+        <p class="description">Tento "osamělý vlk" nepatří k žádné hvězdě. Volně pluje mezihvězdným prostorem v naprosté temnotě. Přestože nemá slunce, které by ji zahřívalo, její povrch stále žhne díky vnitřní energii z dob jejího vzniku před 12 miliony lety.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Mateřská hvězda</span>
+                <span class="stat-val">Žádná</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">80 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Hmotnost</span>
+                <span class="stat-val">6x Jupiter</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Typ</span>
+                <span class="stat-val">Plynný obr</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HD 188753 Ab -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">Trojhvězdný systém</span>
+            <h2>HD 188753 Ab</h2>
+            <p class="description">HD 188753 Ab je první potvrzenou exoplanetou v systému tří hvězd. Je to plynný obr typu „horký Jupiter“, který obíhá svou mateřskou hvězdu v systému, kde jsou gravitace a světlo ovlivňovány dalšími dvěma blízkými hvězdami. Stabilita oběžné dráhy v takto komplexním systému byla pro vědce dlouho záhadou a dokazuje, že planety mohou vznikat i ve velmi divokém prostředí.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Počet sluncí</span>
+                    <span class="stat-val">3</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">151 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Horký Jupiter</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">3,3 dne</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://alchetron.com/cdn/hd-188753-1dec646c-dfaa-4809-966d-f0d0db01f40-resize-750.jpeg" alt="HD 188753 Ab">
+        </div>
+    </section>
+    
+<!-- Gliese 581c -->
+    <section class="planet-card">
+        <div class="info-box">
+            <span class="badge">První „druhá Země“</span>
+            <h2>Gliese 581c</h2>
+            <p class="description">Gliese 581c byla v době svého objevu považována za nejnadějnějšího kandidáta na mimozemský život. Nachází se na vnitřním okraji obyvatelné zóny své hvězdy. Vědci se však dnes obávají, že planeta trpí extrémním skleníkovým efektem podobně jako naše Venuše. Má vázanou rotaci, takže jedna její polovina je neustále spalována hvězdou, zatímco druhá zamrzá v nekonečné noci – život by tak mohl teoreticky existovat pouze v úzkém pásu věčného soumraku mezi těmito světy.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Typ</span>
+                    <span class="stat-val">Superzemě</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vzdálenost</span>
+                    <span class="stat-val">20 sv. let</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Hmotnost</span>
+                    <span class="stat-val">5,5 x Země</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Doba oběhu</span>
+                    <span class="stat-val">13 dní</span>
+                </div>
+            </div>
+        </div>
+        <div class="image-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Gliese_581_Artist%27s_impression.jpg/1280px-Gliese_581_Artist%27s_impression.jpg" alt="Gliese 581c">
+        </div>
+    </section>
+    
+    <!-- Kepler-10b -->
+<section class="planet-card">
+    <div class="info-box">
+        <span class="badge">Lávové peklo</span>
+        <h2>Kepler-10b</h2>
+        <p class="description">Kepler-10b je skalnatý svět, který obíhá svou hvězdu 20× blíže než Merkur Slunce. Kvůli této extrémní blízkosti je planeta „přilivově uzamčena“, takže jedna její strana je neustále vystavena spalujícímu žáru přes 1 300 °C. Tento žár je tak silný, že se jakékoliv horniny na povrchu okamžitě mění v tekuté magma. Vědci předpokládají, že na planetě neustále probíhá masivní sopečná činnost a nad lávovými oceány se tvoří mraky z vypařeného železa a křemičitanů.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Typ</span>
+                <span class="stat-val">Skalnatá superzemě</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Teplota</span>
+                <span class="stat-val">1 370 °C</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">560 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Doba oběhu</span>
+                <span class="stat-val">0,8 pozemského dne</span>
+            </div>
+        </div>
+    </div>
+    <div class="image-box">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqVM3eobx0lIfsWK-NwOgOGQWDGXkqJMTItV-_w3v0uLlU8CYrGwcfdGM_CFetkmgi7Roxi2Tkclu4FamPeUlFQEfLKU6sa5brWufIOf8&s=10" alt="Kepler-10b">
+    </div>
+</section>
+
+<!-- K2-18b -->
+<section class="planet-card">
+    <div class="info-box">
+        <span class="badge">Naděje pro život</span>
+        <h2>K2-18b</h2>
+        <p class="description">K2-18b se nachází v obyvatelné zóně své hvězdy a je unikátní tím, že v její atmosféře Teleskop Jamese Webba detekoval molekuly nesoucí uhlík, včetně metanu a oxidu uhličitého. Co je však nejvíce fascinující, jsou náznaky přítomnosti dimethylsulfidu (DMS). Na Zemi tuto látku produkují pouze živé organismy – konkrétně fytoplankton v oceánech. I když existence života není potvrzena, K2-18b zůstává hlavním cílem při hledání mimozemské biologie.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Typ</span>
+                <span class="stat-val">Hyceánský svět</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">124 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Hmotnost</span>
+                <span class="stat-val">8,6 x Země</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Zajímavost</span>
+                <span class="stat-val">Detekce DMS</span>
+            </div>
+        </div>
+    </div>
+    <div class="image-box">
+        <img src="https://d15-a.sdn.cz/d_15/c_img_oY_A/nsLxLojIIE33kaC6AUsH/5803/k2-18b-exoplaneta-zivot.webp?fl=cro,40,0,1120,630%7Cres,1200,,1%7Cjpg,80,,1">
+    </div>
+</section>
+
+<!-- Kepler-452b -->
+<section class="planet-card">
+    <div class="info-box">
+        <span class="badge">Starší bratranec Země</span>
+        <h2>Kepler-452b</h2>
+        <p class="description">Kepler-452b je první planetou o velikosti blízké Zemi, která obíhá kolem hvězdy velmi podobné našemu Slunci (typ G) v obyvatelné zóně. Je o něco větší a starší než naše planeta, proto se jí přezdívá „Země 2.0“. Vědci předpokládají, že by mohla mít hustou atmosféru, aktivní sopky a možná i tekutou vodu na povrchu. Její hvězda je o 1,5 miliardy let starší než Slunce, což nám dává fascinující pohled na to, jak by mohla vypadat budoucnost naší vlastní planety.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Podobnost se Zemí</span>
+                <span class="stat-val">Index 0,83</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Doba oběhu (rok)</span>
+                <span class="stat-val">385 dní</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">1 400 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Průměr</span>
+                <span class="stat-val">1,6 x Země</span>
+            </div>
+        </div>
+    </div>
+    <div class="image-box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Kepler-452b_artist_concept.jpg/1920px-Kepler-452b_artist_concept.jpg" alt="Kepler-452b">
+    </div>
+</section>
+
+<!-- TOI-700 d -->
+<section class="planet-card">
+    <div class="info-box">
+        <span class="badge">Sousedka v zóně života</span>
+        <h2>TOI-700 d</h2>
+        <p class="description">TOI-700 d je první exoplaneta velikosti Země objevená misí TESS v obyvatelné zóně své hvězdy. Obíhá kolem červeného trpaslíka, což je hvězda menší a chladnější než naše Slunce. Protože je hvězda TOI-700 velmi klidná a nevykazuje žádné ničivé erupce, existuje reálná šance, že si planeta udržela svou atmosféru. Vědecké simulace naznačují, že by mohlo jít o oceánský svět s hustou atmosférou bohatou na oxid uhličitý, podobně jako vypadala raná Země nebo Mars.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Velikost</span>
+                <span class="stat-val">1,2 x Země</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Rok na planetě</span>
+                <span class="stat-val">37 dní</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">100 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Energie od hvězdy</span>
+                <span class="stat-val">86 % (oproti Zemi)</span>
+            </div>
+        </div>
+    </div>
+    <div class="image-box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/PIA23408-Exoplanet-TOI700d-20200106.jpg" alt="TOI-700 d">
+    </div>
+</section>
+
+<!-- LHS 1140 b -->
+<section class="planet-card">
+    <div class="info-box">
+        <span class="badge">Skalnatá pevnost</span>
+        <h2>LHS 1140 b</h2>
+        <p class="description">LHS 1140 b je superzemě, která je mnohem hustší než naše planeta – odhaduje se, že je tvořena převážně skálou s obrovským železným jádrem. Nachází se v obyvatelné zóně své hvězdy a díky své vysoké gravitaci si pravděpodobně dokázala udržet hustou atmosféru. Pro astronomy je to momentálně jeden z nejdůležitějších světů, protože je ideálně natočen k Zemi, což nám umožňuje detailně zkoumat složení jejího vzduchu a hledat známky vody nebo kyslíku.</p>
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Hustota</span>
+                <span class="stat-val">Mnohem vyšší než Země</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Hmotnost</span>
+                <span class="stat-val">~6,6 x Země</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Vzdálenost</span>
+                <span class="stat-val">41 sv. let</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Atmosféra</span>
+                <span class="stat-val">Pravděpodobně hustá</span>
+            </div>
+        </div>
+    </div>
+    <div class="image-box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Artist%E2%80%99s_impression_of_the_super-Earth_exoplanet_LHS_1140b.jpg/1280px-Artist%E2%80%99s_impression_of_the_super-Earth_exoplanet_LHS_1140b.jpg" alt="LHS 1140 b">
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 ExoArchive | Data pocházejí z observatoří NASA, ESA a teleskopu Hubble.</p>
+</footer>
+
+</body>
+</html>
